@@ -5,10 +5,5 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Alpha" Height="300" Width="300" WindowStyle="None" Background="Transparent" ResizeMode="NoResize" AllowsTransparency="True" ShowInTaskbar="False">
-    <Grid Name="gridContent">
-        <Border BorderThickness="5" BorderBrush="Black">
-
-        </Border>
-
-    </Grid>
+    <Grid Name="gridContent"/>
 </Window>
