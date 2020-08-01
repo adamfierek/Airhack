@@ -50,6 +50,15 @@ namespace Airhack
             this.Hide();
         }
 
+        private double getSourceScaleX(PresentationSource source)
+        {
+            return source != null ? source.CompositionTarget.TransformToDevice.M11 : 1;
+        }
+        private double getSourceScaleY(PresentationSource source)
+        {
+            return source != null ? source.CompositionTarget.TransformToDevice.M22 : 1;
+        }
+
         private void Bckgnd_Loaded(object sender, RoutedEventArgs e)
         {
             wndhost = Window.GetWindow(bckgnd);
@@ -64,9 +73,10 @@ namespace Airhack
                 System.Windows.Point targetPoints = source.CompositionTarget.TransformFromDevice.Transform(locationFromScreen);
                 this.Left = targetPoints.X;
                 this.Top = targetPoints.Y;
+
                 Vector size = bckgnd.PointToScreen(new Point(bckgnd.ActualWidth, bckgnd.ActualHeight)) - bckgnd.PointToScreen(new Point(0, 0));
-                this.Height = size.Y;
-                this.Width = size.X;
+                this.Height = size.Y / getSourceScaleY(source);
+                this.Width = size.X / getSourceScaleX(source);
                 this.Show();
                 wndhost.Focus();
             }
@@ -93,8 +103,8 @@ namespace Airhack
             this.Left = targetPoints.X;
             this.Top = targetPoints.Y;
             Vector size = bckgnd.PointToScreen(new Point(bckgnd.ActualWidth, bckgnd.ActualHeight)) - bckgnd.PointToScreen(new Point(0, 0));
-            this.Height = size.Y;
-            this.Width = size.X;
+            this.Height = size.Y / getSourceScaleY(source);
+            this.Width = size.X / getSourceScaleX(source);
         }
 
         private void Wndhost_Closing(object sender, System.ComponentModel.CancelEventArgs e)
