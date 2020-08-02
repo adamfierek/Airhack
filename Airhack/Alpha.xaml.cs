@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Airhack
 {
@@ -39,8 +29,10 @@ namespace Airhack
             InitializeComponent();
             bckgnd = Background;
             bckgnd.Loaded += Bckgnd_Loaded;
+            bckgnd.LayoutUpdated += Bckgnd_LayoutUpdated;
             bckgnd.Unloaded += Bckgnd_Unloaded;
         }
+
 
         private void Bckgnd_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -50,13 +42,38 @@ namespace Airhack
             this.Hide();
         }
 
-        private double getSourceScaleX(PresentationSource source)
+        private double GetSourceScaleX(PresentationSource source)
         {
             return source != null ? source.CompositionTarget.TransformToDevice.M11 : 1;
         }
-        private double getSourceScaleY(PresentationSource source)
+        private double GetSourceScaleY(PresentationSource source)
         {
             return source != null ? source.CompositionTarget.TransformToDevice.M22 : 1;
+        }
+
+        private void UpdateOwnPosition()
+        {
+            if (wndhost == null)
+            {
+                return;
+            }
+            Point locationFromScreen = bckgnd.PointToScreen(new Point(0, 0));
+            PresentationSource source = PresentationSource.FromVisual(wndhost);
+            System.Windows.Point targetPoints = source.CompositionTarget.TransformFromDevice.Transform(locationFromScreen);
+            this.Left = targetPoints.X;
+            this.Top = targetPoints.Y;
+        }
+
+        private void UpdateOwnSize()
+        {
+            if (wndhost == null)
+            {
+                return;
+            }
+            PresentationSource source = PresentationSource.FromVisual(wndhost);
+            Vector size = bckgnd.PointToScreen(new Point(bckgnd.ActualWidth, bckgnd.ActualHeight)) - bckgnd.PointToScreen(new Point(0, 0));
+            this.Height = size.Y / GetSourceScaleY(source);
+            this.Width = size.X / GetSourceScaleX(source);
         }
 
         private void Bckgnd_Loaded(object sender, RoutedEventArgs e)
@@ -68,15 +85,6 @@ namespace Airhack
             wndhost.LocationChanged += Wndhost_LocationChanged;
             try
             {
-                Point locationFromScreen = bckgnd.PointToScreen(new Point(0, 0));
-                PresentationSource source = PresentationSource.FromVisual(wndhost);
-                System.Windows.Point targetPoints = source.CompositionTarget.TransformFromDevice.Transform(locationFromScreen);
-                this.Left = targetPoints.X;
-                this.Top = targetPoints.Y;
-
-                Vector size = bckgnd.PointToScreen(new Point(bckgnd.ActualWidth, bckgnd.ActualHeight)) - bckgnd.PointToScreen(new Point(0, 0));
-                this.Height = size.Y / getSourceScaleY(source);
-                this.Width = size.X / getSourceScaleX(source);
                 this.Show();
                 wndhost.Focus();
             }
@@ -85,26 +93,21 @@ namespace Airhack
                 this.Hide();
             }
         }
+        private void Bckgnd_LayoutUpdated(object sender, EventArgs e)
+        {
+            UpdateOwnPosition();
+            UpdateOwnSize();
+        }
 
         private void Wndhost_LocationChanged(object sender, EventArgs e)
         {
-            Point locationFromScreen = bckgnd.PointToScreen(new Point(0, 0));
-            PresentationSource source = PresentationSource.FromVisual(wndhost);
-            System.Windows.Point targetPoints = source.CompositionTarget.TransformFromDevice.Transform(locationFromScreen);
-            this.Left = targetPoints.X;
-            this.Top = targetPoints.Y;
+            UpdateOwnPosition();
         }
 
         private void Wndhost_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Point locationFromScreen = bckgnd.PointToScreen(new Point(0, 0));
-            PresentationSource source = PresentationSource.FromVisual(wndhost);
-            System.Windows.Point targetPoints = source.CompositionTarget.TransformFromDevice.Transform(locationFromScreen);
-            this.Left = targetPoints.X;
-            this.Top = targetPoints.Y;
-            Vector size = bckgnd.PointToScreen(new Point(bckgnd.ActualWidth, bckgnd.ActualHeight)) - bckgnd.PointToScreen(new Point(0, 0));
-            this.Height = size.Y / getSourceScaleY(source);
-            this.Width = size.X / getSourceScaleX(source);
+            UpdateOwnPosition();
+            UpdateOwnSize();
         }
 
         private void Wndhost_Closing(object sender, System.ComponentModel.CancelEventArgs e)
